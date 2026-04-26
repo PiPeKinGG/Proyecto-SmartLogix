@@ -1,0 +1,26 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: auth-service
+  cloud:
+    discovery:
+      enabled: true
+      service-id: eureka-server
+      client:
+        service-url:
+          defaultZone: http://localhost:8761/eureka/
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+jwt:
+  secret: "smartlogix-super-secret-key"
+  expiration: 3600000 # 1 hora en ms
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
