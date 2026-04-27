@@ -1,0 +1,19 @@
+server:
+  port: 8086
+spring:
+  application:
+    name: notification-service
+  cloud:
+    discovery:
+      enabled: true
+      service-id: eureka-server
+      client:
+        service-url:
+          defaultZone: http://localhost:8761/eureka/
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+kafka:
+  bootstrap-servers: localhost:9092
