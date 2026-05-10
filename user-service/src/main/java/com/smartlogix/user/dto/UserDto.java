@@ -6,7 +6,7 @@ public class UserDto {
     private String nombre;
     private String role;
     private Long pymeId;
-
+    private String password;
     // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -18,4 +18,6 @@ public class UserDto {
     public void setRole(String role) { this.role = role; }
     public Long getPymeId() { return pymeId; }
     public void setPymeId(Long pymeId) { this.pymeId = pymeId; }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 }

@@ -18,6 +18,8 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
 
 feign:
   client:
@@ -27,7 +29,7 @@ feign:
         readTimeout: 5000
 
 jwt:
-  secret: "smartlogix-super-secret-key"
+  secret: "smartlogix-super-secret-key-1234567890"
   expiration: 3600000
 
 management:

@@ -23,9 +23,12 @@ public class UserService {
     public UserVerifyResponse verifyUser(UserVerifyRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
         UserVerifyResponse response = new UserVerifyResponse();
+        
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            if (passwordEncoder.matches(request.getPassword(), user.getPasswordHash()) && user.getPymeId().equals(request.getPymeId())) {
+            boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+            
+            if (matches) {
                 response.setValid(true);
                 response.setUserId(user.getId());
                 response.setPymeId(user.getPymeId());
@@ -46,7 +49,7 @@ public class UserService {
     public UserDto createUser(UserDto dto) {
         User user = new User();
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(dto.getEmail())); // Debe venir el password real
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword())); // Se encripta la contraseña correctamente
         user.setNombre(dto.getNombre());
         user.setRole(dto.getRole());
         user.setPymeId(dto.getPymeId());

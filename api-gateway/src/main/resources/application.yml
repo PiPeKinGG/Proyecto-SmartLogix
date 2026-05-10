@@ -39,9 +39,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+instance:
+    prefer-ip-address: true
 
 jwt:
-  secret: "REEMPLAZAR_CON_SECRETO_COMPARTIDO_DEL_AUTH_SERVICE"
+  secret: "smartlogix-super-secret-key-1234567890"
 
 management:
   endpoints:
