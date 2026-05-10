@@ -1,12 +1,13 @@
 server:
   port: 8084
+
 spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/smartlogix_orders
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/smartlogix_orders}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -15,23 +16,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  cloud:
-    discovery:
-      enabled: true
-      service-id: eureka-server
-      client:
-        service-url:
-          defaultZone: http://localhost:8761/eureka/
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*'
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
 feign:
   client:
     config:
       default:
         connectTimeout: 5000
         readTimeout: 5000
-kafka:
-  bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

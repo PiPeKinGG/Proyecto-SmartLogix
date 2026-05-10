@@ -1,24 +1,35 @@
 server:
   port: 8081
+
 spring:
   application:
     name: auth-service
-  cloud:
-    discovery:
-      enabled: true
-      service-id: eureka-server
-      client:
-        service-url:
-          defaultZone: http://localhost:8761/eureka/
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/smartlogix_auth}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
 feign:
   client:
     config:
       default:
         connectTimeout: 5000
         readTimeout: 5000
+
 jwt:
   secret: "smartlogix-super-secret-key"
-  expiration: 3600000 # 1 hora en ms
+  expiration: 3600000
+
 management:
   endpoints:
     web:

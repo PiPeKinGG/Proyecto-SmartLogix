@@ -1,4 +1,3 @@
-
 server:
   port: 8080
 
@@ -35,12 +34,11 @@ spring:
           uri: lb://notification-service
           predicates:
             - Path=/notifications/**
-    discovery:
-      enabled: true
-      service-id: eureka-server
-      client:
-        service-url:
-          defaultZone: http://localhost:8761/eureka/
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
 
 jwt:
   secret: "REEMPLAZAR_CON_SECRETO_COMPARTIDO_DEL_AUTH_SERVICE"
