@@ -15,8 +15,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Agregamos comodines (**) para dejar pasar el registro sin importar cómo llegue desde el Gateway
-                .requestMatchers("/internal/users/**", "/users/**", "/api/users/**", "/register", "/**/register").permitAll()
+                .requestMatchers("/internal/users/**", "/users/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

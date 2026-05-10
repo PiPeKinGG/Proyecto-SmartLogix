@@ -21,32 +21,23 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     public UserVerifyResponse verifyUser(UserVerifyRequest request) {
-        System.out.println(">>> [DEBUG] INICIANDO LOGIN PARA EMAIL: '" + request.getEmail() + "'");
-        System.out.println(">>> [DEBUG] PASSWORD RECIBIDO: '" + request.getPassword() + "'");
-        
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
         UserVerifyResponse response = new UserVerifyResponse();
         
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            System.out.println(">>> [DEBUG] USUARIO ENCONTRADO. Hash en BD: " + user.getPasswordHash());
-            
             boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
-            System.out.println(">>> [DEBUG] ¿COINCIDEN LAS CONTRASEÑAS?: " + matches);
             
             if (matches) {
                 response.setValid(true);
                 response.setUserId(user.getId());
                 response.setPymeId(user.getPymeId());
                 response.setRole(user.getRole());
-                System.out.println(">>> [DEBUG] LOGIN EXITOSO");
             } else {
                 response.setValid(false);
-                System.out.println(">>> [DEBUG] FALLO: CONTRASEÑA INCORRECTA");
             }
         } else {
             response.setValid(false);
-            System.out.println(">>> [DEBUG] FALLO: USUARIO NO EXISTE EN LA BASE DE DATOS");
         }
         return response;
     }
