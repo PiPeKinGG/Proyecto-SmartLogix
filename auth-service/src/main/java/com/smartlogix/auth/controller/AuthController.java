@@ -15,11 +15,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        try {
+       // try {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).build();
-        }
+      //  } catch (Exception e) {
+       //     return ResponseEntity.status(401).build();
+       // }
     }
 }
