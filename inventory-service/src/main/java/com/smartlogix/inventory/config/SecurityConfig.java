@@ -13,7 +13,9 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().authenticated()
+                // Permitimos todas las peticiones porque la validación del JWT 
+                // ya ocurrió en la capa perimetral (API Gateway)
+                .anyRequest().permitAll()
             );
         return http.build();
     }

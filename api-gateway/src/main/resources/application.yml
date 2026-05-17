@@ -36,7 +36,7 @@ spring:
         - id: inventory-service
           uri: lb://inventory-service
           predicates:
-            - Path=/inventory/**
+            - Path=/inventory/**, /products/** # Añadimos /products/** para emparejar con ProductController
         - id: order-service
           uri: lb://order-service
           predicates:

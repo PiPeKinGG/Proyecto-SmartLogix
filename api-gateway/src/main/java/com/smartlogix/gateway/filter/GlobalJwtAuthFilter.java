@@ -1,20 +1,23 @@
 package com.smartlogix.gateway.filter;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import reactor.core.publisher.Mono;
 
 @Component
 public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
@@ -26,12 +29,20 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-        if (path.startsWith("/api/")) {
+
+        // 1. Permitir peticiones OPTIONS (Preflight de CORS) sin token de autenticación
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            return chain.filter(exchange);
+        }
+
+        // 2. Proteger todas las rutas del ecosistema, excluyendo únicamente el Auth Service (/auth/**)
+        if (!path.startsWith("/auth/")) {
             String authHeader = request.getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
+            
             String token = authHeader.substring(7);
             try {
                 SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
@@ -40,23 +51,27 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
-                // Optionally, you can add claims to headers for downstream services
+
+                // 3. Mutar la petición e inyectar las cabeceras exactas que esperan tus microservicios downstream
+                // Se mapea "pyme_id" con guion bajo para satisfacer el @RequestHeader("pyme_id") de los controladores
                 ServerHttpRequest mutatedRequest = request.mutate()
                         .header("userId", String.valueOf(claims.get("userId")))
-                        .header("pymeId", String.valueOf(claims.get("pymeId")))
+                        .header("pyme_id", String.valueOf(claims.get("pymeId")))
                         .header("role", String.valueOf(claims.get("role")))
                         .build();
+                        
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
             } catch (Exception e) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
         }
+        
         return chain.filter(exchange);
     }
 
     @Override
     public int getOrder() {
-        return -1; // Highest precedence
+        return -1; // Máxima precedencia en el pipeline del Gateway
     }
 }

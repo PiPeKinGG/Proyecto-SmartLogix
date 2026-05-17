@@ -13,7 +13,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().authenticated()
+                // Delegamos la autenticación al Gateway
+                .anyRequest().permitAll()
             );
         return http.build();
     }
