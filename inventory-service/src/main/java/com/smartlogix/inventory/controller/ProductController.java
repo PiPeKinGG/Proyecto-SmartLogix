@@ -32,6 +32,12 @@ public class ProductController {
         return productService.createProduct(product);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product, @RequestHeader("pyme_id") Long pymeId) {
+        Optional<Product> updatedProduct = productService.updateProduct(id, pymeId, product);
+        return updatedProduct.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/reserve")
     public ResponseEntity<String> reserve(@RequestParam Long productId, @RequestParam int quantity, @RequestHeader("pyme_id") Long pymeId) {
         boolean reserved = productService.reserveStock(productId, pymeId, quantity);

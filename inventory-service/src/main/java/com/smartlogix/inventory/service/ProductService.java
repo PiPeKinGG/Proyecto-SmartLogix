@@ -29,6 +29,25 @@ public class ProductService {
     }
 
     @Transactional
+    public Optional<Product> updateProduct(Long id, Long pymeId, Product productDetails) {
+        Optional<Product> opt = productRepository.findByIdAndPymeId(id, pymeId);
+        if (opt.isPresent()) {
+            Product existingProduct = opt.get();
+            existingProduct.setName(productDetails.getName());
+
+            // Calculamos la diferencia en la cantidad total para ajustar la disponible
+            int diff = productDetails.getTotalQuantity() - existingProduct.getTotalQuantity();
+            existingProduct.setTotalQuantity(productDetails.getTotalQuantity());
+            
+            // Sumamos (o restamos) la diferencia al stock disponible actual
+            existingProduct.setAvailableQuantity(existingProduct.getAvailableQuantity() + diff);
+
+            return Optional.of(productRepository.save(existingProduct));
+        }
+        return Optional.empty();
+    }
+
+    @Transactional
     public boolean reserveStock(Long productId, Long pymeId, int quantity) {
         Optional<Product> opt = productRepository.findByIdAndPymeId(productId, pymeId);
         if (opt.isPresent()) {

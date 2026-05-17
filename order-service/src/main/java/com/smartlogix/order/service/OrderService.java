@@ -30,8 +30,17 @@ public class OrderService {
         Order order = new Order();
         order.setPymeId(request.getPymeId());
         order.setUserId(request.getUserId());
+        
+        // --- NUEVOS CAMPOS LOGÍSTICOS Y COMERCIALES ---
+        order.setCustomerName(request.getCustomerName());
+        order.setCustomerRut(request.getCustomerRut());
+        order.setCustomerEmail(request.getCustomerEmail());
+        order.setShippingAddress(request.getShippingAddress());
+        order.setTotalAmount(request.getTotalAmount());
+        
         order.setStatus("PENDING");
         order.setCreatedAt(LocalDateTime.now());
+        
         List<OrderItem> items = new ArrayList<>();
         boolean allReserved = true;
         for (OrderRequest.OrderItemRequest itemReq : request.getItems()) {
@@ -47,6 +56,7 @@ public class OrderService {
             items.add(item);
         }
         order.setItems(items);
+        
         if (allReserved) {
             order.setStatus("CONFIRMED");
             orderRepository.save(order);

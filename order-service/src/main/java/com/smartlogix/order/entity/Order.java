@@ -27,6 +27,22 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    // --- NUEVOS CAMPOS COMERCIALES Y LOGÍSTICOS ---
+    @Column(nullable = false)
+    private String customerName;
+
+    @Column(nullable = false)
+    private String customerRut;
+
+    @Column(nullable = false)
+    private String customerEmail;
+
+    @Column(nullable = false)
+    private String shippingAddress;
+
+    @Column(nullable = false)
+    private Double totalAmount;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items;
 }

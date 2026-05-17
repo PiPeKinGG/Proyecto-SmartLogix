@@ -7,6 +7,14 @@ import java.util.List;
 public class OrderRequest {
     private Long pymeId;
     private Long userId;
+    
+    // --- NUEVOS CAMPOS ---
+    private String customerName;
+    private String customerRut;
+    private String customerEmail;
+    private String shippingAddress;
+    private Double totalAmount; 
+    
     private List<OrderItemRequest> items;
 
     @Data
