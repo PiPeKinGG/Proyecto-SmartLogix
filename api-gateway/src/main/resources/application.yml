@@ -9,6 +9,21 @@ spring:
       discovery:
         locator:
           enabled: true
+      # --- INICIO CONFIGURACIÓN CORS ---
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:5173" # Damos permiso explícito a tu frontend de React
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS # Vital para que el preflight no de error 403
+            allowedHeaders: "*"
+            allowCredentials: true
+      # --- FIN CONFIGURACIÓN CORS ---
       routes:
         - id: auth-service
           uri: lb://auth-service
