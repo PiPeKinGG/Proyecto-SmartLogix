@@ -29,6 +29,12 @@ public class UserService {
             boolean matches = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
             
             if (matches) {
+                // Verificar si el usuario está activo antes de dejarlo entrar (opcional, pero recomendado)
+                // if (user.getIsActive() != null && !user.getIsActive()) {
+                //     response.setValid(false);
+                //     return response;
+                // }
+                
                 response.setValid(true);
                 response.setUserId(user.getId());
                 response.setPymeId(user.getPymeId());
@@ -49,12 +55,39 @@ public class UserService {
     public UserDto createUser(UserDto dto) {
         User user = new User();
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword())); // Se encripta la contraseña correctamente
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setNombre(dto.getNombre());
         user.setRole(dto.getRole());
         user.setPymeId(dto.getPymeId());
+        
+        // Por defecto, un usuario nuevo se crea activo
+        user.setIsActive(true); 
+        
         user = userRepository.save(user);
         return toDto(user);
+    }
+
+    // NUEVO MÉTODO: Actualizar un usuario existente
+    public UserDto updateUser(Long id, UserDto dto) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        user.setNombre(dto.getNombre());
+        user.setRole(dto.getRole());
+        user.setPymeId(dto.getPymeId());
+        // El email no lo actualizamos por seguridad y para mantener consistencia como login
+        
+        user = userRepository.save(user);
+        return toDto(user);
+    }
+
+    // NUEVO MÉTODO: Cambiar estado Activo/Inactivo
+    public void updateUserStatus(Long id, Boolean isActive) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        user.setIsActive(isActive);
+        userRepository.save(user);
     }
 
     private UserDto toDto(User user) {
@@ -64,6 +97,7 @@ public class UserService {
         dto.setNombre(user.getNombre());
         dto.setRole(user.getRole());
         dto.setPymeId(user.getPymeId());
+        dto.setIsActive(user.getIsActive()); // Pasamos el estado al frontend
         return dto;
     }
 }
