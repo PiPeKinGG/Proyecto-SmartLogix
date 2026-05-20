@@ -1,0 +1,107 @@
+package com.smartlogix.order.event;
+
+import com.smartlogix.order.entity.Order;
+import com.smartlogix.order.repository.OrderRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class OrderEventListenerTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private KafkaTemplate<String, OrderConfirmedEvent> kafkaTemplate;
+
+    @InjectMocks
+    private OrderEventListener listener;
+
+    private Order order;
+
+    @BeforeEach
+    void setUp() {
+        order = new Order();
+        order.setId(1L);
+        order.setPymeId(100L);
+        order.setUserId(7L);
+        order.setStatus("PENDING");
+        order.setShippingType("STANDARD");
+    }
+
+    @Test
+    void testHandleInventoryReservedSuccess_ConfirmsOrderAndPublishesEvent() {
+        // Given
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        // When
+        listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 100L));
+
+        // Then
+        assertEquals("CONFIRMED", order.getStatus());
+        verify(orderRepository).save(order);
+
+        ArgumentCaptor<OrderConfirmedEvent> eventCaptor = ArgumentCaptor.forClass(OrderConfirmedEvent.class);
+        verify(kafkaTemplate).send(eq("order-confirmed"), eventCaptor.capture());
+        assertEquals(1L, eventCaptor.getValue().getOrderId());
+        assertEquals(100L, eventCaptor.getValue().getPymeId());
+        assertEquals(7L, eventCaptor.getValue().getUserId());
+        assertEquals("STANDARD", eventCaptor.getValue().getShippingType());
+    }
+
+    @Test
+    void testHandleInventoryReservedSuccess_IgnoresAlreadyConfirmedOrder() {
+        // Given
+        order.setStatus("CONFIRMED");
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        // When
+        listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 100L));
+
+        // Then
+        verify(orderRepository, never()).save(order);
+        verify(kafkaTemplate, never()).send(eq("order-confirmed"), org.mockito.ArgumentMatchers.any(OrderConfirmedEvent.class));
+    }
+
+    @Test
+    void testHandleInventoryReservedSuccess_PymeMismatch() {
+        // Given
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        // When & Then
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 200L))
+        );
+        assertEquals("Order not found or pymeId mismatch", exception.getMessage());
+        verify(orderRepository, never()).save(order);
+    }
+
+    @Test
+    void testHandleInventoryReservedFailed_CancelsOrder() {
+        // Given
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        // When
+        listener.handleInventoryReservedFailed(new InventoryReservedFailedEvent(1L, 100L));
+
+        // Then
+        assertEquals("CANCELLED_NO_STOCK", order.getStatus());
+        verify(orderRepository).save(order);
+    }
+}
