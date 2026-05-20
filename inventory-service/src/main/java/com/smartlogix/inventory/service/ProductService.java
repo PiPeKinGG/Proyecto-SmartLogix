@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Service
 public class ProductService {
+    
     @Autowired
     private ProductRepository productRepository;
 
@@ -29,39 +30,39 @@ public class ProductService {
     }
 
     @Transactional
-    public boolean reserveStock(Long productId, Long pymeId, int quantity) {
-        Optional<Product> opt = productRepository.findByIdAndPymeId(productId, pymeId);
+    public Optional<Product> updateProduct(Long id, Long pymeId, Product productDetails) {
+        Optional<Product> opt = productRepository.findByIdAndPymeId(id, pymeId);
         if (opt.isPresent()) {
-            Product product = opt.get();
-            if (product.getAvailableQuantity() >= quantity) {
-                product.setAvailableQuantity(product.getAvailableQuantity() - quantity);
-                product.setReservedQuantity(product.getReservedQuantity() + quantity);
-                productRepository.save(product);
-                return true;
-            }
+            Product existingProduct = opt.get();
+            existingProduct.setName(productDetails.getName());
+
+            // Calculamos la diferencia en la cantidad total para ajustar la disponible
+            int diff = productDetails.getTotalQuantity() - existingProduct.getTotalQuantity();
+            existingProduct.setTotalQuantity(productDetails.getTotalQuantity());
+            
+            // Sumamos (o restamos) la diferencia al stock disponible actual
+            existingProduct.setAvailableQuantity(existingProduct.getAvailableQuantity() + diff);
+
+            return Optional.of(productRepository.save(existingProduct));
         }
-        return false;
+        return Optional.empty();
+    }
+
+    @Transactional
+    public boolean reserveStock(Long productId, Long pymeId, int quantity) {
+        // Ejecuta la actualización atómica en la base de datos.
+        // Si retorna > 0, significa que encontró el producto y había stock suficiente.
+        int updatedRows = productRepository.reserveStockAtomic(productId, pymeId, quantity);
+        return updatedRows > 0;
     }
 
     @Transactional
     public void confirmReservation(Long productId, Long pymeId, int quantity) {
-        Optional<Product> opt = productRepository.findByIdAndPymeId(productId, pymeId);
-        if (opt.isPresent()) {
-            Product product = opt.get();
-            product.setReservedQuantity(product.getReservedQuantity() - quantity);
-            product.setTotalQuantity(product.getTotalQuantity() - quantity);
-            productRepository.save(product);
-        }
+        productRepository.confirmReservationAtomic(productId, pymeId, quantity);
     }
 
     @Transactional
     public void cancelReservation(Long productId, Long pymeId, int quantity) {
-        Optional<Product> opt = productRepository.findByIdAndPymeId(productId, pymeId);
-        if (opt.isPresent()) {
-            Product product = opt.get();
-            product.setAvailableQuantity(product.getAvailableQuantity() + quantity);
-            product.setReservedQuantity(product.getReservedQuantity() - quantity);
-            productRepository.save(product);
-        }
+        productRepository.cancelReservationAtomic(productId, pymeId, quantity);
     }
 }

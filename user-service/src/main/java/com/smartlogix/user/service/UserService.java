@@ -1,17 +1,18 @@
 package com.smartlogix.user.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.smartlogix.user.dto.UserDto;
 import com.smartlogix.user.dto.UserVerifyRequest;
 import com.smartlogix.user.dto.UserVerifyResponse;
 import com.smartlogix.user.entity.User;
 import com.smartlogix.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -49,12 +50,34 @@ public class UserService {
     public UserDto createUser(UserDto dto) {
         User user = new User();
         user.setEmail(dto.getEmail());
-        user.setPasswordHash(passwordEncoder.encode(dto.getPassword())); // Se encripta la contraseña correctamente
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setNombre(dto.getNombre());
         user.setRole(dto.getRole());
         user.setPymeId(dto.getPymeId());
+        user.setIsActive(true); 
+        
         user = userRepository.save(user);
         return toDto(user);
+    }
+
+    public UserDto updateUser(Long id, UserDto dto) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        user.setNombre(dto.getNombre());
+        user.setRole(dto.getRole());
+        user.setPymeId(dto.getPymeId());
+        
+        user = userRepository.save(user);
+        return toDto(user);
+    }
+
+    public void updateUserStatus(Long id, Boolean isActive) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        
+        user.setIsActive(isActive);
+        userRepository.save(user);
     }
 
     private UserDto toDto(User user) {
@@ -64,6 +87,7 @@ public class UserService {
         dto.setNombre(user.getNombre());
         dto.setRole(user.getRole());
         dto.setPymeId(user.getPymeId());
+        dto.setIsActive(user.getIsActive()); 
         return dto;
     }
 }

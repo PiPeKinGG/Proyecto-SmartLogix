@@ -1,41 +1,13 @@
-# ==========================================
-# Etapa 1: Construcción (Build Stage)
-# ==========================================
+
 FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
-
-# Establecemos el directorio de trabajo dentro del contenedor
 WORKDIR /app
-
-# Copiamos el archivo pom.xml primero
 COPY pom.xml .
-
-# Descargamos las dependencias de Maven. 
-# Al hacer esto antes de copiar el código fuente, aprovechamos la caché de Docker.
-# Si el pom.xml no cambia, Docker no volverá a descargar todo de internet.
 RUN mvn dependency:go-offline -B
-
-# Ahora copiamos el código fuente de la aplicación
 COPY src ./src
-
-# Compilamos el proyecto y generamos el .jar omitiendo los tests para mayor velocidad
 RUN mvn clean package -DskipTests
-
-# ==========================================
-# Etapa 2: Ejecución (Run Stage)
-# ==========================================
 FROM eclipse-temurin:21-jre-alpine
-
-# Metadatos del mantenedor (opcional pero recomendado)
 LABEL maintainer="SmartLogix DevOps Team"
-
 WORKDIR /app
-
-# Copiamos ÚNICAMENTE el archivo .jar generado en la etapa 1 ("builder")
-# Esto reduce el tamaño de la imagen final de ~800MB a ~150MB
 COPY --from=builder /app/target/*.jar app.jar
-
-# Configuración recomendada para contenedores Spring Boot (optimización de memoria)
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-
-# Punto de entrada para ejecutar el microservicio
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

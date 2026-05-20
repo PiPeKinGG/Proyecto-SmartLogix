@@ -7,7 +7,8 @@ import com.smartlogix.order.entity.OrderItem;
 import com.smartlogix.order.event.OrderConfirmedEvent;
 import com.smartlogix.order.feign.InventoryClient;
 import com.smartlogix.order.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import feign.FeignException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,70 +18,193 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private InventoryClient inventoryClient;
-    @Autowired
-    private KafkaTemplate<String, OrderConfirmedEvent> kafkaTemplate;
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_CONFIRMED = "CONFIRMED";
+    private static final String STATUS_CANCELLED_NO_STOCK = "CANCELLED_NO_STOCK";
+    private static final String STATUS_DELIVERED = "DELIVERED";
+
+    private static final String SHIPPING_STANDARD = "STANDARD";
+    private static final String SHIPPING_EXPRESS = "EXPRESS";
+    private static final String SHIPPING_STANDARD_ES = "ESTANDAR";
+    private static final String SHIPPING_EXPRESS_ES = "EXPRES";
+
+    private static final String USER_STATUS_PENDING = "Pendiente";
+    private static final String USER_STATUS_CONFIRMED = "Confirmado";
+    private static final String USER_STATUS_CANCELLED_NO_STOCK = "Cancelado por falta de stock";
+    private static final String USER_STATUS_DELIVERED = "Entregado";
+    private static final String USER_SHIPPING_STANDARD = "Estandar";
+    private static final String USER_SHIPPING_EXPRESS = "Expres";
+
+    private final OrderRepository orderRepository;
+    private final InventoryClient inventoryClient;
+    private final KafkaTemplate<String, OrderConfirmedEvent> orderConfirmedKafkaTemplate;
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
+        Order order = createPendingOrder(request);
+        List<OrderItem> reservedItems = new ArrayList<>();
+
+        try {
+            reserveInventory(order, reservedItems);
+            confirmOrder(order);
+            publishOrderConfirmed(order);
+        } catch (FeignException ex) {
+            compensateInventory(reservedItems, order.getPymeId());
+            cancelOrderNoStock(order);
+        }
+
+        return toResponse(order);
+    }
+
+    @Transactional
+    public void updateOrderStatusToDelivered(Long orderId, Long pymeId) {
+        Order order = findOrderByIdAndPyme(orderId, pymeId);
+        order.setStatus(STATUS_DELIVERED);
+        orderRepository.save(order);
+    }
+
+    public List<OrderResponse> getOrdersByPyme(Long pymeId) {
+        return orderRepository.findAllByPymeIdOrderByCreatedAtDesc(pymeId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private Order createPendingOrder(OrderRequest request) {
         Order order = new Order();
         order.setPymeId(request.getPymeId());
         order.setUserId(request.getUserId());
-        order.setStatus("PENDING");
+        order.setCustomerName(request.getCustomerName());
+        order.setCustomerRut(request.getCustomerRut());
+        order.setCustomerEmail(request.getCustomerEmail());
+        order.setShippingAddress(request.getShippingAddress());
+        order.setShippingType(normalizeShippingType(request.getShippingType()));
+        order.setTotalAmount(request.getTotalAmount());
+        order.setStatus(STATUS_PENDING);
         order.setCreatedAt(LocalDateTime.now());
+        order.setItems(buildOrderItems(request, order));
+
+        return orderRepository.saveAndFlush(order);
+    }
+
+    private List<OrderItem> buildOrderItems(OrderRequest request, Order order) {
         List<OrderItem> items = new ArrayList<>();
-        boolean allReserved = true;
-        for (OrderRequest.OrderItemRequest itemReq : request.getItems()) {
-            String reserveResult = inventoryClient.reserveStock(itemReq.getProductId(), itemReq.getQuantity(), request.getPymeId());
-            if (!"Stock reservado".equals(reserveResult)) {
-                allReserved = false;
-                break;
-            }
+        for (OrderRequest.OrderItemRequest itemRequest : request.getItems()) {
             OrderItem item = new OrderItem();
             item.setOrder(order);
-            item.setProductId(itemReq.getProductId());
-            item.setQuantity(itemReq.getQuantity());
+            item.setProductId(itemRequest.getProductId());
+            item.setQuantity(itemRequest.getQuantity());
             items.add(item);
         }
-        order.setItems(items);
-        if (allReserved) {
-            order.setStatus("CONFIRMED");
-            orderRepository.save(order);
-            // Confirm reservation in inventory
-            for (OrderItem item : items) {
-                inventoryClient.confirmReservation(item.getProductId(), item.getQuantity(), request.getPymeId());
-            }
-            // Publish event
-            OrderConfirmedEvent event = new OrderConfirmedEvent(order.getId(), order.getPymeId(), order.getUserId());
-            kafkaTemplate.send("order-confirmed", event);
-        } else {
-            order.setStatus("CANCELLED_NO_STOCK");
-            orderRepository.save(order);
-            // Cancel reservation in inventory
-            for (OrderItem item : items) {
-                inventoryClient.cancelReservation(item.getProductId(), item.getQuantity(), request.getPymeId());
+        return items;
+    }
+
+    private void reserveInventory(Order order, List<OrderItem> reservedItems) {
+        for (OrderItem item : order.getItems()) {
+            inventoryClient.reserveStock(item.getProductId(), item.getQuantity(), order.getPymeId());
+            reservedItems.add(item);
+        }
+    }
+
+    private void confirmOrder(Order order) {
+        order.setStatus(STATUS_CONFIRMED);
+        orderRepository.save(order);
+    }
+
+    private void cancelOrderNoStock(Order order) {
+        order.setStatus(STATUS_CANCELLED_NO_STOCK);
+        orderRepository.save(order);
+    }
+
+    private void compensateInventory(List<OrderItem> reservedItems, Long pymeId) {
+        for (OrderItem item : reservedItems) {
+            try {
+                inventoryClient.cancelReservation(item.getProductId(), item.getQuantity(), pymeId);
+            } catch (FeignException ignored) {
+                // La orden queda cancelada; la reconciliacion de stock puede reintentarse operacionalmente.
             }
         }
-        // Build response
+    }
+
+    private void publishOrderConfirmed(Order order) {
+        OrderConfirmedEvent event = new OrderConfirmedEvent(
+                order.getId(),
+                order.getPymeId(),
+                order.getUserId(),
+                order.getShippingType()
+        );
+        orderConfirmedKafkaTemplate.send("order-confirmed", event);
+    }
+
+    private Order findOrderByIdAndPyme(Long orderId, Long pymeId) {
+        return orderRepository.findByIdAndPymeId(orderId, pymeId)
+                .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado o no pertenece a la pyme"));
+    }
+
+    private String normalizeShippingType(String shippingType) {
+        if (shippingType == null || shippingType.isBlank()) {
+            return SHIPPING_STANDARD;
+        }
+
+        String normalized = shippingType.trim().toUpperCase();
+        if (SHIPPING_STANDARD_ES.equals(normalized)) {
+            return SHIPPING_STANDARD;
+        }
+        if (SHIPPING_EXPRESS_ES.equals(normalized)) {
+            return SHIPPING_EXPRESS;
+        }
+        if (SHIPPING_STANDARD.equals(normalized) || SHIPPING_EXPRESS.equals(normalized)) {
+            return normalized;
+        }
+
+        throw new IllegalArgumentException("El tipo de envio debe ser Estandar o Expres");
+    }
+
+    private OrderResponse toResponse(Order order) {
         OrderResponse response = new OrderResponse();
+        response.setId(order.getId());
         response.setOrderId(order.getId());
-        response.setStatus(order.getStatus());
-        List<OrderResponse.OrderItemDto> itemDtos = new ArrayList<>();
-        for (OrderItem item : items) {
-            OrderResponse.OrderItemDto dto = new OrderResponse.OrderItemDto();
-            dto.setProductId(item.getProductId());
-            dto.setQuantity(item.getQuantity());
-            itemDtos.add(dto);
-        }
-        response.setItems(itemDtos);
+        response.setPymeId(order.getPymeId());
+        response.setUserId(order.getUserId());
+        response.setStatus(toSpanishStatus(order.getStatus()));
+        response.setCustomerName(order.getCustomerName());
+        response.setCustomerRut(order.getCustomerRut());
+        response.setCustomerEmail(order.getCustomerEmail());
+        response.setShippingAddress(order.getShippingAddress());
+        response.setShippingType(toSpanishShippingType(order.getShippingType()));
+        response.setTotalAmount(order.getTotalAmount());
+        response.setCreatedAt(order.getCreatedAt());
+        response.setItems(toItemResponses(order.getItems()));
         return response;
     }
 
-    public List<Order> getOrdersByPyme(Long pymeId) {
-        return orderRepository.findAllByPymeId(pymeId);
+    private List<OrderResponse.OrderItemDto> toItemResponses(List<OrderItem> items) {
+        List<OrderResponse.OrderItemDto> itemResponses = new ArrayList<>();
+        for (OrderItem item : items) {
+            OrderResponse.OrderItemDto itemResponse = new OrderResponse.OrderItemDto();
+            itemResponse.setProductId(item.getProductId());
+            itemResponse.setQuantity(item.getQuantity());
+            itemResponses.add(itemResponse);
+        }
+        return itemResponses;
     }
+
+    private String toSpanishStatus(String status) {
+        if (STATUS_PENDING.equals(status)) return USER_STATUS_PENDING;
+        if (STATUS_CONFIRMED.equals(status)) return USER_STATUS_CONFIRMED;
+        if (STATUS_CANCELLED_NO_STOCK.equals(status)) return USER_STATUS_CANCELLED_NO_STOCK;
+        if (STATUS_DELIVERED.equals(status)) return USER_STATUS_DELIVERED;
+        return status;
+    }
+
+    private String toSpanishShippingType(String shippingType) {
+        if (SHIPPING_STANDARD.equals(shippingType)) return USER_SHIPPING_STANDARD;
+        if (SHIPPING_EXPRESS.equals(shippingType)) return USER_SHIPPING_EXPRESS;
+        return shippingType;
+    }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)

@@ -3,7 +3,7 @@ package com.smartlogix.shipping.service;
 public class StandardShippingStrategy implements ShippingStrategy {
     @Override
     public double calculateCost() {
-        return 5.0; // ejemplo fijo
+        return 5.0; 
     }
     @Override
     public int calculateEstimatedDays() {
