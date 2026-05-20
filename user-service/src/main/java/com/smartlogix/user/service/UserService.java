@@ -1,17 +1,18 @@
 package com.smartlogix.user.service;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.smartlogix.user.dto.UserDto;
 import com.smartlogix.user.dto.UserVerifyRequest;
 import com.smartlogix.user.dto.UserVerifyResponse;
 import com.smartlogix.user.entity.User;
 import com.smartlogix.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -70,7 +71,7 @@ public class UserService {
     // NUEVO MÉTODO: Actualizar un usuario existente
     public UserDto updateUser(Long id, UserDto dto) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new com.smartlogix.user.exception.UserException("Usuario no encontrado con ID: " + id));
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
         
         user.setNombre(dto.getNombre());
         user.setRole(dto.getRole());
@@ -84,7 +85,7 @@ public class UserService {
     // NUEVO MÉTODO: Cambiar estado Activo/Inactivo
     public void updateUserStatus(Long id, Boolean isActive) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new com.smartlogix.user.exception.UserException("Usuario no encontrado con ID: " + id));
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
         
         user.setIsActive(isActive);
         userRepository.save(user);
