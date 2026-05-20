@@ -16,7 +16,6 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // ¡Agregamos /error a la lista blanca!
                 .requestMatchers("/auth/**", "/error").permitAll()
                 .anyRequest().authenticated()
             );

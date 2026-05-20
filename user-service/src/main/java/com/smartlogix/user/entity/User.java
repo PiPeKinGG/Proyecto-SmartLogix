@@ -23,12 +23,10 @@ public class User {
 
     @Column(nullable = false)
     private String role;
-
-    // Nuevo campo para saber si el usuario está habilitado
     @Column(name = "is_active", columnDefinition = "boolean default true")
     private Boolean isActive;
 
-    // Getters y setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     

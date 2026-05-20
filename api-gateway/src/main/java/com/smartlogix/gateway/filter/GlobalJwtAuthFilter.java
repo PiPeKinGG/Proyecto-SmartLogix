@@ -29,13 +29,9 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-
-        // 1. Permitir peticiones OPTIONS (Preflight de CORS) sin token de autenticación
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
-
-        // 2. Proteger todas las rutas del ecosistema, excluyendo únicamente el Auth Service (/auth/**)
         if (!path.startsWith("/auth/")) {
             String authHeader = request.getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -51,9 +47,6 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
                         .build()
                         .parseClaimsJws(token)
                         .getBody();
-
-                // 3. Mutar la petición e inyectar las cabeceras exactas que esperan tus microservicios downstream
-                // Se mapea "pyme_id" con guion bajo para satisfacer el @RequestHeader("pyme_id") de los controladores
                 ServerHttpRequest mutatedRequest = request.mutate()
                         .header("userId", String.valueOf(claims.get("userId")))
                         .header("pyme_id", String.valueOf(claims.get("pymeId")))
@@ -72,6 +65,6 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1; // Máxima precedencia en el pipeline del Gateway
+        return -1; 
     }
 }

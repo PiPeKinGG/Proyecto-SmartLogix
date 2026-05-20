@@ -191,28 +191,20 @@ public class OrderService {
     }
 
     private String toSpanishStatus(String status) {
-        if (STATUS_PENDING.equals(status)) {
-            return USER_STATUS_PENDING;
-        }
-        if (STATUS_CONFIRMED.equals(status)) {
-            return USER_STATUS_CONFIRMED;
-        }
-        if (STATUS_CANCELLED_NO_STOCK.equals(status)) {
-            return USER_STATUS_CANCELLED_NO_STOCK;
-        }
-        if (STATUS_DELIVERED.equals(status)) {
-            return USER_STATUS_DELIVERED;
-        }
+        if (STATUS_PENDING.equals(status)) return USER_STATUS_PENDING;
+        if (STATUS_CONFIRMED.equals(status)) return USER_STATUS_CONFIRMED;
+        if (STATUS_CANCELLED_NO_STOCK.equals(status)) return USER_STATUS_CANCELLED_NO_STOCK;
+        if (STATUS_DELIVERED.equals(status)) return USER_STATUS_DELIVERED;
         return status;
     }
 
     private String toSpanishShippingType(String shippingType) {
-        if (SHIPPING_STANDARD.equals(shippingType)) {
-            return USER_SHIPPING_STANDARD;
-        }
-        if (SHIPPING_EXPRESS.equals(shippingType)) {
-            return USER_SHIPPING_EXPRESS;
-        }
+        if (SHIPPING_STANDARD.equals(shippingType)) return USER_SHIPPING_STANDARD;
+        if (SHIPPING_EXPRESS.equals(shippingType)) return USER_SHIPPING_EXPRESS;
         return shippingType;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)

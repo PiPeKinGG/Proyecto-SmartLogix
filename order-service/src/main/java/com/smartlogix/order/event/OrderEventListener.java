@@ -19,7 +19,7 @@ public class OrderEventListener {
     public void handleInventoryReservedSuccess(InventoryReservedSuccessEvent event) {
         Order order = orderRepository.findById(event.getOrderId())
                 .filter(o -> o.getPymeId().equals(event.getPymeId()))
-                .orElseThrow(() -> new RuntimeException("Order not found or pymeId mismatch"));
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada o pymeId no coincide"));
         if ("CONFIRMED".equals(order.getStatus())) {
             return;
         }
@@ -39,7 +39,7 @@ public class OrderEventListener {
     public void handleInventoryReservedFailed(InventoryReservedFailedEvent event) {
         Order order = orderRepository.findById(event.getOrderId())
                 .filter(o -> o.getPymeId().equals(event.getPymeId()))
-                .orElseThrow(() -> new RuntimeException("Order not found or pymeId mismatch"));
+                .orElseThrow(() -> new RuntimeException("Orden no encontrada o pymeId no coincide"));
         order.setStatus("CANCELLED_NO_STOCK");
         orderRepository.save(order);
     }

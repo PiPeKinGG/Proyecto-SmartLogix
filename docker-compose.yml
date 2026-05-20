@@ -2,9 +2,6 @@ networks:
   smartlogix-net:
     driver: bridge
 
-# ==========================================
-# ANCLAS (Reutilización de código YAML)
-# ==========================================
 x-microservice-dependencies: &microservice_dependencies
   postgres:
     condition: service_healthy
@@ -14,9 +11,6 @@ x-microservice-dependencies: &microservice_dependencies
     condition: service_healthy
 
 services:
-  # ==========================================
-  # 1. INFRAESTRUCTURA BASE
-  # ==========================================
   postgres:
     image: postgres:15-alpine
     container_name: postgres-db
@@ -36,7 +30,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Kafka en modo autónomo (KRaft) sin Zookeeper
   kafka:
     image: apache/kafka:3.8.0
     container_name: kafka
@@ -78,9 +71,6 @@ services:
       retries: 10
       start_period: 30s
 
-  # ==========================================
-  # 2. API GATEWAY
-  # ==========================================
   api-gateway:
     build:
       context: ./api-gateway
@@ -96,9 +86,6 @@ services:
     networks:
       - smartlogix-net
 
-  # ==========================================
-  # 3. MICROSERVICIOS DE NEGOCIO
-  # ==========================================
   user-service:
     build:
       context: ./user-service

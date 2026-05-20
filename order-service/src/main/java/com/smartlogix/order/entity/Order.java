@@ -32,7 +32,7 @@ public class Order {
     private Long userId;
 
     @Column(nullable = false)
-    private String status; // PENDING, CONFIRMED, CANCELLED_NO_STOCK, DELIVERED
+    private String status; 
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -70,4 +70,8 @@ public class Order {
             createdAt = LocalDateTime.now();
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)
