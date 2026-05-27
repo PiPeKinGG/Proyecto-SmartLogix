@@ -203,3 +203,4 @@ public class OrderService {
         if (SHIPPING_EXPRESS.equals(shippingType)) return USER_SHIPPING_EXPRESS;
         return shippingType;
     }
+}
