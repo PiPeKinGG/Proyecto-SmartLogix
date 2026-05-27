@@ -203,8 +203,3 @@ public class OrderService {
         if (SHIPPING_EXPRESS.equals(shippingType)) return USER_SHIPPING_EXPRESS;
         return shippingType;
     }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)
