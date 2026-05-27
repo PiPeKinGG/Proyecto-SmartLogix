@@ -47,8 +47,4 @@ public class OrderRequest {
         @Positive(message = "La cantidad debe ser mayor a cero")
         private Integer quantity;
     }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)
+
