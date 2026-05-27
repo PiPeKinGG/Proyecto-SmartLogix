@@ -70,8 +70,4 @@ public class Order {
             createdAt = LocalDateTime.now();
         }
     }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> 800946a (Se modificaron los comentarios en codigo y readme.md)
+
