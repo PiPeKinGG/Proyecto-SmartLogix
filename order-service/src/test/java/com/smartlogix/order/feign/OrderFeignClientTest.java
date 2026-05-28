@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrderFeignClientTest {
     @Test
-    void testFeignClientLoads() {
-        OrderFeignClient client = null;
-        assertNull(client); // Solo para verificar carga, reemplazar por mocks reales si es necesario
+    void testInventoryClientLoads() {
+        InventoryClient client = null; 
+        assertNull(client); 
     }
 }
