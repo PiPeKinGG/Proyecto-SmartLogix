@@ -1,19 +1,18 @@
 package com.smartlogix.auth.dto;
 
-public class LoginRequest {
-    private String email;
-    private String password;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
+@Getter
+@Setter
+public class LoginRequest {
+    
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "El formato del correo no es válido")
+    private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
+    private String password;
 }

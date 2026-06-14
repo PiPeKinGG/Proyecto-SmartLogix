@@ -4,15 +4,15 @@ import com.smartlogix.auth.dto.LoginRequest;
 import com.smartlogix.auth.dto.LoginResponse;
 import com.smartlogix.auth.dto.UserVerificationResponse;
 import com.smartlogix.auth.feign.UserClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private UserClient userClient;
-    @Autowired
-    private JwtService jwtService;
+    
+    private final UserClient userClient;
+    private final JwtService jwtService;
 
     public LoginResponse login(LoginRequest request) {
         UserVerificationResponse verification = userClient.verifyUser(request);
