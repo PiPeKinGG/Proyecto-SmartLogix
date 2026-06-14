@@ -4,7 +4,7 @@ import com.smartlogix.order.dto.OrderRequest;
 import com.smartlogix.order.dto.OrderResponse;
 import com.smartlogix.order.service.OrderService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
+@RequiredArgsConstructor
 public class OrderController {
-    @Autowired
-    private OrderService orderService;
+    
+    private final OrderService orderService;
 
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request, @RequestHeader("pyme_id") Long pymeId, @RequestHeader("userId") Long userId) {
@@ -25,9 +26,10 @@ public class OrderController {
     }
 
     @GetMapping
-    public List<OrderResponse> getOrders(@RequestHeader("pyme_id") Long pymeId) {
-        return orderService.getOrdersByPyme(pymeId);
+    public ResponseEntity<List<OrderResponse>> getOrders(@RequestHeader("pyme_id") Long pymeId) {
+        return ResponseEntity.ok(orderService.getOrdersByPyme(pymeId));
     }
+    
     @PostMapping("/delivered")
     public ResponseEntity<String> updateOrderStatusToDelivered(@RequestParam Long orderId, @RequestHeader("pyme_id") Long pymeId) {
         orderService.updateOrderStatusToDelivered(orderId, pymeId);
