@@ -88,7 +88,7 @@ public class OrderEventListenerTest {
                 RuntimeException.class,
                 () -> listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 200L))
         );
-        assertEquals("Order not found or pymeId mismatch", exception.getMessage());
+        assertEquals("Orden no encontrada o pymeId no coincide", exception.getMessage());
         verify(orderRepository, never()).save(order);
     }
 
