@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    
+
     private final OrderService orderService;
 
     @PostMapping
@@ -29,10 +29,31 @@ public class OrderController {
     public ResponseEntity<List<OrderResponse>> getOrders(@RequestHeader("pyme_id") Long pymeId) {
         return ResponseEntity.ok(orderService.getOrdersByPyme(pymeId));
     }
-    
+
     @PostMapping("/delivered")
     public ResponseEntity<String> updateOrderStatusToDelivered(@RequestParam Long orderId, @RequestHeader("pyme_id") Long pymeId) {
         orderService.updateOrderStatusToDelivered(orderId, pymeId);
         return ResponseEntity.ok("Pedido marcado como Entregado");
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderResponse> updateStatus(
+            @PathVariable Long id,
+            @RequestBody StatusUpdateRequest request,
+            @RequestHeader("pyme_id") Long pymeId) {
+        OrderResponse response = orderService.updateOrderStatus(id, pymeId, request.getStatus());
+        return ResponseEntity.ok(response);
+    }
+
+    public static class StatusUpdateRequest {
+        private String status;
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
     }
 }

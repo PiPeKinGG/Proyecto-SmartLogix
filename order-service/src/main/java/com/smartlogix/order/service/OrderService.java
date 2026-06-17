@@ -23,6 +23,7 @@ public class OrderService {
     private static final String STATUS_PENDING = "PENDING";
     private static final String STATUS_CONFIRMED = "CONFIRMED";
     private static final String STATUS_CANCELLED_NO_STOCK = "CANCELLED_NO_STOCK";
+    private static final String STATUS_SHIPPED = "SHIPPED";
     private static final String STATUS_DELIVERED = "DELIVERED";
 
     private static final String SHIPPING_STANDARD = "STANDARD";
@@ -33,6 +34,7 @@ public class OrderService {
     private static final String USER_STATUS_PENDING = "Pendiente";
     private static final String USER_STATUS_CONFIRMED = "Confirmado";
     private static final String USER_STATUS_CANCELLED_NO_STOCK = "Cancelado por falta de stock";
+    private static final String USER_STATUS_SHIPPED = "Enviado";
     private static final String USER_STATUS_DELIVERED = "Entregado";
     private static final String USER_SHIPPING_STANDARD = "Estandar";
     private static final String USER_SHIPPING_EXPRESS = "Expres";
@@ -63,6 +65,14 @@ public class OrderService {
         Order order = findOrderByIdAndPyme(orderId, pymeId);
         order.setStatus(STATUS_DELIVERED);
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public OrderResponse updateOrderStatus(Long orderId, Long pymeId, String newStatus) {
+        Order order = findOrderByIdAndPyme(orderId, pymeId);
+        order.setStatus(validateStatus(newStatus));
+        Order saved = orderRepository.save(order);
+        return toResponse(saved);
     }
 
     public List<OrderResponse> getOrdersByPyme(Long pymeId) {
@@ -161,6 +171,21 @@ public class OrderService {
         throw new IllegalArgumentException("El tipo de envio debe ser Estandar o Expres");
     }
 
+    private String validateStatus(String status) {
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("El estado no puede estar vacio");
+        }
+        String normalized = status.trim().toUpperCase();
+        if (!normalized.equals(STATUS_PENDING)
+                && !normalized.equals(STATUS_CONFIRMED)
+                && !normalized.equals(STATUS_CANCELLED_NO_STOCK)
+                && !normalized.equals(STATUS_SHIPPED)
+                && !normalized.equals(STATUS_DELIVERED)) {
+            throw new IllegalArgumentException("Estado invalido: " + status);
+        }
+        return normalized;
+    }
+
     private OrderResponse toResponse(Order order) {
         OrderResponse response = new OrderResponse();
         response.setId(order.getId());
@@ -194,6 +219,7 @@ public class OrderService {
         if (STATUS_PENDING.equals(status)) return USER_STATUS_PENDING;
         if (STATUS_CONFIRMED.equals(status)) return USER_STATUS_CONFIRMED;
         if (STATUS_CANCELLED_NO_STOCK.equals(status)) return USER_STATUS_CANCELLED_NO_STOCK;
+        if (STATUS_SHIPPED.equals(status)) return USER_STATUS_SHIPPED;
         if (STATUS_DELIVERED.equals(status)) return USER_STATUS_DELIVERED;
         return status;
     }
