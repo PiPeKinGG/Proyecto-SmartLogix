@@ -46,9 +46,11 @@ spring:
           predicates:
             - Path=/shipping/**
         - id: notification-service
-          uri: lb://notification-service
+          uri: http://localhost:8086
           predicates:
             - Path=/notifications/**
+          filters:
+            - RewritePath=/notifications/(?<segment>.*), /${segment}
 
 eureka:
   client:

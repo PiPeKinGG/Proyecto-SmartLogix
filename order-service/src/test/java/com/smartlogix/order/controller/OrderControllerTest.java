@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -26,8 +27,9 @@ class OrderControllerTest {
         Long pymeId = 1L;
         OrderResponse orderResponse = new OrderResponse();
         when(orderService.getOrdersByPyme(pymeId)).thenReturn(List.of(orderResponse));
-        List<OrderResponse> response = orderController.getOrders(pymeId);
+        ResponseEntity<List<OrderResponse>> response = orderController.getOrders(pymeId);
         assertNotNull(response);
-        assertEquals(1, response.size());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().size());
     }
 }

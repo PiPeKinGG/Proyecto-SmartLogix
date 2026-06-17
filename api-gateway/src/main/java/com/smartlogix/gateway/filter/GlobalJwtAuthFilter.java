@@ -29,10 +29,13 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
+        
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
-        if (!path.startsWith("/auth/")) {
+        
+        // MODIFICACIÓN: Agregamos las rutas de Node.js a las exclusiones del JWT
+        if (!path.startsWith("/auth/") && !path.startsWith("/notifications/") && !path.startsWith("/api/notifications/") && !path.equals("/health")) {
             String authHeader = request.getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
