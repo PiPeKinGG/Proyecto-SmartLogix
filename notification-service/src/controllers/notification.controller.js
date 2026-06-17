@@ -4,14 +4,11 @@ const sendNotification = async (req, res, next) => {
     try {
         const { recipient, subject, message } = req.body;
 
-        // Validación de negocio
         if (!recipient || !subject || !message) {
             const error = new Error('Faltan campos obligatorios: recipient, subject, message');
-            error.status = 400; // Bad Request
+            error.status = 400; 
             throw error;
         }
-
-        // Delegamos la lógica asíncrona al Service
         const info = await emailService.sendEmail(recipient, subject, message);
         
         res.status(200).json({
@@ -25,7 +22,7 @@ const sendNotification = async (req, res, next) => {
             }
         });
     } catch (error) {
-        next(error); // Deriva el error al Middleware Global de app.js
+        next(error); 
     }
 };
 

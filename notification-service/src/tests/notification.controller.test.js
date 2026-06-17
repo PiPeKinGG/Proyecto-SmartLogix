@@ -2,12 +2,10 @@ const request = require('supertest');
 const app = require('../app'); 
 const emailService = require('../services/email.service');
 
-// Mockeamos el servicio de correos para aislar la prueba unitaria
 jest.mock('../services/email.service');
 
 describe('Notification API Endpoints', () => {
-    
-    // Limpiamos los mocks antes de cada prueba
+
     beforeEach(() => {
         jest.clearAllMocks();
     });
@@ -23,7 +21,6 @@ describe('Notification API Endpoints', () => {
 
     describe('POST /api/notifications/send', () => {
         it('debería retornar 200 y el messageId cuando los datos son válidos', async () => {
-            // Preparamos el comportamiento del Mock (Igual que "when().thenReturn()" en Mockito)
             emailService.sendEmail.mockResolvedValue({ messageId: 'mock-id-9876' });
 
             const res = await request(app)
@@ -37,9 +34,7 @@ describe('Notification API Endpoints', () => {
             expect(res.statusCode).toBe(200);
             expect(res.body.success).toBe(true);
             expect(res.body.data.recipient).toBe('cliente@test.com');
-            expect(res.body.data.messageId).toBe('mock-id-9876'); // Verificamos que devuelva el ID simulado
-            
-            // Verificamos que el servicio fue llamado exactamente 1 vez con los parámetros correctos
+            expect(res.body.data.messageId).toBe('mock-id-9876'); 
             expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
             expect(emailService.sendEmail).toHaveBeenCalledWith(
                 'cliente@test.com', 
@@ -58,7 +53,6 @@ describe('Notification API Endpoints', () => {
             expect(res.statusCode).toBe(400);
             expect(res.body.error).toBe('Faltan campos obligatorios: recipient, subject, message');
             
-            // Verificamos que en caso de error de validación, NO se intenta enviar el correo
             expect(emailService.sendEmail).not.toHaveBeenCalled();
         });
     });

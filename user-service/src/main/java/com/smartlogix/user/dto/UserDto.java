@@ -8,10 +8,8 @@ public class UserDto {
     private Long pymeId;
     private String password;
     
-    // Nuevo campo agregado al DTO
     private Boolean isActive;
 
-    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
@@ -30,7 +28,6 @@ public class UserDto {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    // Getters y setters para isActive
     public Boolean getIsActive() { return isActive; }
     public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

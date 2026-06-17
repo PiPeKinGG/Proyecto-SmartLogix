@@ -10,6 +10,5 @@ class UserApplicationTests {
 
     @Test
     void contextLoads() {
-        // Verifica que el contexto de Spring se cargue correctamente
     }
 }

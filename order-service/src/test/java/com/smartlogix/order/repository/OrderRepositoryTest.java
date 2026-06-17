@@ -16,7 +16,6 @@ class OrderRepositoryTest {
     @Autowired
     private OrderRepository orderRepository;
 
-    // Método auxiliar para crear una orden válida con todos los campos obligatorios
     private Order createValidOrder() {
         Order order = new Order();
         order.setCustomerEmail("cliente@test.com");

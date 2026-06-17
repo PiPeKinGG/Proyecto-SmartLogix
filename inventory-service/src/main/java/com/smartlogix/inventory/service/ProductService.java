@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    
+
     private final ProductRepository productRepository;
 
     public List<ProductResponse> getAllProductsByPyme(Long pymeId) {
@@ -38,7 +38,8 @@ public class ProductService {
         product.setTotalQuantity(request.getTotalQuantity());
         product.setAvailableQuantity(request.getTotalQuantity());
         product.setReservedQuantity(0);
-        
+        product.setPrice(request.getPrice());
+
         Product savedProduct = productRepository.save(product);
         return mapToResponse(savedProduct);
     }
@@ -49,6 +50,7 @@ public class ProductService {
         if (opt.isPresent()) {
             Product existingProduct = opt.get();
             existingProduct.setName(productDetails.getName());
+            existingProduct.setPrice(productDetails.getPrice());
 
             int diff = productDetails.getTotalQuantity() - existingProduct.getTotalQuantity();
             existingProduct.setTotalQuantity(productDetails.getTotalQuantity());
@@ -75,7 +77,6 @@ public class ProductService {
         productRepository.cancelReservationAtomic(productId, pymeId, quantity);
     }
 
-    // Método de mapeo de Entidad a DTO de respuesta
     private ProductResponse mapToResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
@@ -84,6 +85,7 @@ public class ProductService {
         response.setAvailableQuantity(product.getAvailableQuantity());
         response.setReservedQuantity(product.getReservedQuantity());
         response.setTotalQuantity(product.getTotalQuantity());
+        response.setPrice(product.getPrice());
         return response;
     }
 }

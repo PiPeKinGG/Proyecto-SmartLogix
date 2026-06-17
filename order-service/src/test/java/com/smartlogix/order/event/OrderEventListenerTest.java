@@ -46,13 +46,8 @@ public class OrderEventListenerTest {
 
     @Test
     void testHandleInventoryReservedSuccess_ConfirmsOrderAndPublishesEvent() {
-        // Given
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        // When
         listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 100L));
-
-        // Then
         assertEquals("CONFIRMED", order.getStatus());
         verify(orderRepository).save(order);
 
@@ -66,41 +61,28 @@ public class OrderEventListenerTest {
 
     @Test
     void testHandleInventoryReservedSuccess_IgnoresAlreadyConfirmedOrder() {
-        // Given
         order.setStatus("CONFIRMED");
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        // When
         listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 100L));
-
-        // Then
         verify(orderRepository, never()).save(order);
-        verify(kafkaTemplate, never()).send(eq("order-confirmed"), org.mockito.ArgumentMatchers.any(OrderConfirmedEvent.class));
+        verify(kafkaTemplate, never()).send(eq("order-confirmed"),
+                org.mockito.ArgumentMatchers.any(OrderConfirmedEvent.class));
     }
 
     @Test
     void testHandleInventoryReservedSuccess_PymeMismatch() {
-        // Given
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        // When & Then
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
-                () -> listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 200L))
-        );
+                () -> listener.handleInventoryReservedSuccess(new InventoryReservedSuccessEvent(1L, 200L)));
         assertEquals("Orden no encontrada o pymeId no coincide", exception.getMessage());
         verify(orderRepository, never()).save(order);
     }
 
     @Test
     void testHandleInventoryReservedFailed_CancelsOrder() {
-        // Given
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-
-        // When
         listener.handleInventoryReservedFailed(new InventoryReservedFailedEvent(1L, 100L));
-
-        // Then
         assertEquals("CANCELLED_NO_STOCK", order.getStatus());
         verify(orderRepository).save(order);
     }

@@ -33,4 +33,8 @@ public class Product {
     @Min(value = 0, message = "La cantidad total no puede ser negativa")
     @Column(nullable = false)
     private Integer totalQuantity;
+
+    @Min(value = 0, message = "El precio no puede ser negativo")
+    @Column(nullable = false)
+    private Double price;
 }

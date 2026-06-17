@@ -12,4 +12,5 @@ public class ProductResponse {
     private Integer availableQuantity;
     private Integer reservedQuantity;
     private Integer totalQuantity;
+    private Double price;
 }

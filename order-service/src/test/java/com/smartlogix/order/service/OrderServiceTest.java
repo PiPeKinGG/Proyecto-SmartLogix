@@ -74,10 +74,8 @@ public class OrderServiceTest {
         });
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
         OrderResponse response = orderService.createOrder(request);
 
-        // Then
         assertNotNull(response);
         assertEquals(1L, response.getOrderId());
         assertEquals(100L, response.getPymeId());
@@ -106,7 +104,6 @@ public class OrderServiceTest {
 
     @Test
     void testCreateOrder_CancelsReservedItemsWhenStockReservationFails() {
-        // Given
         FeignException stockException = mock(FeignException.class);
         when(orderRepository.saveAndFlush(any(Order.class))).thenAnswer(invocation -> {
             Order order = invocation.getArgument(0);
@@ -122,10 +119,8 @@ public class OrderServiceTest {
             return "Stock reservado";
         });
 
-        // When
         OrderResponse response = orderService.createOrder(request);
 
-        // Then
         assertNotNull(response);
         assertEquals(2L, response.getOrderId());
         assertEquals("Cancelado por falta de stock", response.getStatus());
@@ -141,10 +136,8 @@ public class OrderServiceTest {
 
     @Test
     void testCreateOrder_InvalidShippingType() {
-        // Given
         request.setShippingType("OVERNIGHT");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> orderService.createOrder(request));
         assertEquals("El tipo de envio debe ser Estandar o Expres", exception.getMessage());
 
@@ -154,24 +147,19 @@ public class OrderServiceTest {
 
     @Test
     void testUpdateOrderStatusToDelivered_Success() {
-        // Given
         Order order = order(3L, "CONFIRMED", "STANDARD");
         when(orderRepository.findByIdAndPymeId(3L, 100L)).thenReturn(Optional.of(order));
 
-        // When
         orderService.updateOrderStatusToDelivered(3L, 100L);
 
-        // Then
         assertEquals("DELIVERED", order.getStatus());
         verify(orderRepository).save(order);
     }
 
     @Test
     void testUpdateOrderStatusToDelivered_NotFound() {
-        // Given
         when(orderRepository.findByIdAndPymeId(99L, 100L)).thenReturn(Optional.empty());
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> orderService.updateOrderStatusToDelivered(99L, 100L)
@@ -182,14 +170,11 @@ public class OrderServiceTest {
 
     @Test
     void testGetOrdersByPyme_MapsResponseForUser() {
-        // Given
         Order order = order(4L, "DELIVERED", "STANDARD");
         when(orderRepository.findAllByPymeIdOrderByCreatedAtDesc(100L)).thenReturn(List.of(order));
 
-        // When
         List<OrderResponse> responses = orderService.getOrdersByPyme(100L);
 
-        // Then
         assertEquals(1, responses.size());
         assertEquals(4L, responses.get(0).getOrderId());
         assertEquals("Entregado", responses.get(0).getStatus());
