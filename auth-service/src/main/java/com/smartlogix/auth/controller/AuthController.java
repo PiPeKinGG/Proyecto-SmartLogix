@@ -1,29 +1,32 @@
 package com.smartlogix.auth.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.smartlogix.auth.dto.LoginRequest;
+import com.smartlogix.auth.dto.LoginResponse;
+import com.smartlogix.auth.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.smartlogix.auth.dto.LoginRequest;
-import com.smartlogix.auth.dto.LoginResponse;
-import com.smartlogix.auth.service.AuthService;
-
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+    
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).build();
+        } catch (RuntimeException e) {
+            // Retorna un 401 de forma limpia si el RuntimeException salta desde el AuthService
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 }
