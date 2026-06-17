@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    
+
     private final AuthService authService;
 
     @PostMapping("/login")
@@ -25,7 +25,6 @@ public class AuthController {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            // Retorna un 401 de forma limpia si el RuntimeException salta desde el AuthService
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

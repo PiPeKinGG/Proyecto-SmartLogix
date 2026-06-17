@@ -33,8 +33,6 @@ public class GlobalJwtAuthFilter implements GlobalFilter, Ordered {
         if (request.getMethod() == HttpMethod.OPTIONS) {
             return chain.filter(exchange);
         }
-        
-        // MODIFICACIÓN: Agregamos las rutas de Node.js a las exclusiones del JWT
         if (!path.startsWith("/auth/") && !path.startsWith("/notifications/") && !path.startsWith("/api/notifications/") && !path.equals("/health")) {
             String authHeader = request.getHeaders().getFirst("Authorization");
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {

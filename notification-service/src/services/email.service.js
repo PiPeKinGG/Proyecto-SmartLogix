@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 
-// Configuramos el "transporte" leyendo las variables de entorno de tu .env
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
@@ -10,10 +9,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-/**
- * Función asíncrona para enviar correos.
- * Demuestra el poder de Node.js para tareas de entrada/salida sin bloquear el hilo principal.
- */
 const sendEmail = async (to, subject, text) => {
     try {
         const info = await transporter.sendMail({

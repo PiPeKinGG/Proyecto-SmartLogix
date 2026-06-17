@@ -10,7 +10,6 @@ class OrderDtoTest {
 
     @Test
     void testOrderRequestAndInnerClass() {
-        // 1. Instanciar y probar Setters
         OrderRequest request = new OrderRequest();
         request.setPymeId(1L);
         request.setUserId(2L);
@@ -25,8 +24,6 @@ class OrderDtoTest {
         item.setProductId(10L);
         item.setQuantity(2);
         request.setItems(List.of(item));
-
-        // 2. Probar Getters
         assertEquals(1L, request.getPymeId());
         assertEquals(2L, request.getUserId());
         assertEquals("Juan", request.getCustomerName());
@@ -38,8 +35,6 @@ class OrderDtoTest {
         assertEquals(1, request.getItems().size());
         assertEquals(10L, item.getProductId());
         assertEquals(2, item.getQuantity());
-
-        // 3. Probar métodos generados por Lombok (toString, hashCode, equals)
         assertNotNull(request.toString());
         assertNotNull(item.toString());
         assertNotEquals(0, request.hashCode());
@@ -56,7 +51,6 @@ class OrderDtoTest {
 
     @Test
     void testOrderResponseAndInnerClass() {
-        // 1. Instanciar y probar Setters
         OrderResponse response = new OrderResponse();
         response.setId(1L);
         response.setOrderId(100L);
@@ -75,15 +69,12 @@ class OrderDtoTest {
         item.setProductId(20L);
         item.setQuantity(5);
         response.setItems(List.of(item));
-
-        // 2. Probar Getters
         assertEquals(1L, response.getId());
         assertEquals(100L, response.getOrderId());
         assertEquals("PENDING", response.getStatus());
         assertEquals(20L, item.getProductId());
         assertEquals(5, item.getQuantity());
 
-        // 3. Probar métodos generados por Lombok
         assertNotNull(response.toString());
         assertNotNull(item.toString());
         assertNotEquals(0, response.hashCode());
