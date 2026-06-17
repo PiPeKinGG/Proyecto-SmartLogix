@@ -1,28 +1,33 @@
 package com.smartlogix.auth.exception;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.HashMap;
+import java.util.Map;
 
-class GlobalExceptionHandlerTest {
+@RestControllerAdvice
+public class GlobalExceptionHandler {
 
-    private final GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
 
-    @Test
-    void testHandleRuntimeException() {
-        // Given
-        RuntimeException exception = new RuntimeException("Credenciales inválidas");
-
-        // When
-        // Nota: Asegúrate de que el método invocado corresponda a la firma que tienes en tu clase real
-        ResponseEntity<?> response = exceptionHandler.handleRuntimeException(exception);
-
-        // Then
-        assertNotNull(response);
-        // Ajusta el estatus esperado de acuerdo a la respuesta real que configuraste (ej. UNAUTHORIZED o BAD_REQUEST)
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errors);
     }
 }

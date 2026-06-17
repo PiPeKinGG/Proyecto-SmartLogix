@@ -1,7 +1,8 @@
 package com.smartlogix.inventory.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smartlogix.inventory.entity.Product;
+import com.smartlogix.inventory.dto.ProductRequest;
+import com.smartlogix.inventory.dto.ProductResponse;
 import com.smartlogix.inventory.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,21 +36,27 @@ public class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Product sampleProduct() {
-        Product p = new Product();
-        p.setId(1L);
-        p.setPymeId(100L);
-        p.setName("Test Product");
-        p.setTotalQuantity(50);
-        p.setAvailableQuantity(50);
-        p.setReservedQuantity(0);
-        return p;
+    private ProductResponse sampleResponse() {
+        ProductResponse r = new ProductResponse();
+        r.setId(1L);
+        r.setPymeId(100L);
+        r.setName("Test Product");
+        r.setTotalQuantity(50);
+        r.setAvailableQuantity(50);
+        r.setReservedQuantity(0);
+        return r;
+    }
+
+    private ProductRequest sampleRequest() {
+        ProductRequest r = new ProductRequest();
+        r.setName("Test Product");
+        r.setTotalQuantity(50);
+        return r;
     }
 
     @Test
     void testGetAll() throws Exception {
-        Product p = sampleProduct();
-        when(productService.getAllProductsByPyme(100L)).thenReturn(List.of(p));
+        when(productService.getAllProductsByPyme(100L)).thenReturn(List.of(sampleResponse()));
 
         mockMvc.perform(get("/products").header("pyme_id", "100"))
                 .andExpect(status().isOk())
@@ -61,8 +68,7 @@ public class ProductControllerTest {
 
     @Test
     void testGetById_Found() throws Exception {
-        Product p = sampleProduct();
-        when(productService.getProductById(1L, 100L)).thenReturn(Optional.of(p));
+        when(productService.getProductById(1L, 100L)).thenReturn(Optional.of(sampleResponse()));
 
         mockMvc.perform(get("/products/1").header("pyme_id", "100"))
                 .andExpect(status().isOk())
@@ -83,60 +89,45 @@ public class ProductControllerTest {
 
     @Test
     void testCreate() throws Exception {
-        Product toCreate = new Product();
-        toCreate.setName("New Product");
-        toCreate.setTotalQuantity(20);
-
-        when(productService.createProduct(any(Product.class))).thenAnswer(invocation -> {
-            Product arg = invocation.getArgument(0);
-            arg.setId(2L);
-            return arg;
-        });
+        ProductResponse created = sampleResponse();
+        created.setId(2L);
+        when(productService.createProduct(any(ProductRequest.class), eq(100L))).thenReturn(created);
 
         mockMvc.perform(post("/products")
                         .header("pyme_id", "100")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(toCreate)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.pymeId").value(100));
+                        .content(objectMapper.writeValueAsString(sampleRequest())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2));
 
-        verify(productService).createProduct(any(Product.class));
+        verify(productService).createProduct(any(ProductRequest.class), eq(100L));
     }
 
     @Test
     void testUpdate_Success() throws Exception {
-        Product p = sampleProduct();
-        Product updateData = new Product();
-        updateData.setName("Updated Product");
-        updateData.setTotalQuantity(60);
-
-        when(productService.updateProduct(eq(1L), eq(100L), any(Product.class))).thenReturn(Optional.of(p));
+        when(productService.updateProduct(eq(1L), eq(100L), any(ProductRequest.class))).thenReturn(Optional.of(sampleResponse()));
 
         mockMvc.perform(put("/products/1")
                         .header("pyme_id", "100")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateData)))
+                        .content(objectMapper.writeValueAsString(sampleRequest())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
 
-        verify(productService).updateProduct(eq(1L), eq(100L), any(Product.class));
+        verify(productService).updateProduct(eq(1L), eq(100L), any(ProductRequest.class));
     }
 
     @Test
     void testUpdate_NotFound() throws Exception {
-        Product updateData = new Product();
-        updateData.setName("Updated Product");
-
-        when(productService.updateProduct(eq(1L), eq(100L), any(Product.class))).thenReturn(Optional.empty());
+        when(productService.updateProduct(eq(1L), eq(100L), any(ProductRequest.class))).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/products/1")
                         .header("pyme_id", "100")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateData)))
+                        .content(objectMapper.writeValueAsString(sampleRequest())))
                 .andExpect(status().isNotFound());
 
-        verify(productService).updateProduct(eq(1L), eq(100L), any(Product.class));
+        verify(productService).updateProduct(eq(1L), eq(100L), any(ProductRequest.class));
     }
 
     @Test
@@ -195,4 +186,3 @@ public class ProductControllerTest {
         verify(productService).cancelReservation(1L, 100L, 10);
     }
 }
-
