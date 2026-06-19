@@ -4,7 +4,7 @@
 
 **Microservicio de autenticación y gestión de seguridad para el ecosistema SmartLogix.**
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -39,7 +39,7 @@ React (Frontend)  →  API Gateway (:8080)  →  Auth Service (:8081)  →  Open
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Seguridad | Spring Security + JWT |
 | Base de Datos | PostgreSQL |
@@ -53,7 +53,7 @@ React (Frontend)  →  API Gateway (:8080)  →  Auth Service (:8081)  →  Open
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- **JDK 17** o superior
+- **JDK 21** 
 - **Maven 3.8** o superior
 - **PostgreSQL** corriendo de forma local con una base de datos llamada `smartlogix_auth`
 - **Eureka Server** corriendo en el puerto `8761` para permitir el registro en la red
