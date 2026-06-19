@@ -18,13 +18,13 @@
 
 El **Auth Service** es el microservicio encargado de gestionar la seguridad, la autenticación de usuarios y la emisión de tokens JWT dentro del ecosistema de SmartLogix.
 
-> **Nota:** Este servicio **no almacena** la información completa de los usuarios. En su lugar, se comunica de forma interna con el `user-service` a través de **OpenFeign** para validar las credenciales ingresadas.
+> **Nota:** Este servicio **no almacena** la información completa de los usuarios. Este se comunica con el `user-service` a través de **OpenFeign** para validar las credenciales ingresadas.
 
 ---
 
 ## Integración en la Arquitectura
 
-Este servicio actúa como puerta de entrada al sistema de seguridad. El flujo de comunicación es el siguiente:
+Este servicio actúa como puerta de entrada al sistema de seguridad. El flujo es el siguiente:
 
 ```
 React (Frontend)  →  API Gateway (:8080)  →  Auth Service (:8081)  →  OpenFeign  →  User Service
@@ -125,7 +125,7 @@ mvn clean test
 **Request Body:**
 ```json
 {
-  "email": "admin@empresa.cl",
+  "email": "matias.guzman@smartlogix.com",
   "password": "password"
 }
 ```
