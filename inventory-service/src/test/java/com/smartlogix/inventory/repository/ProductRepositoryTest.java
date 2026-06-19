@@ -27,6 +27,7 @@ public class ProductRepositoryTest {
         p.setTotalQuantity(50);
         p.setAvailableQuantity(50);
         p.setReservedQuantity(0);
+        p.setPrice(19.99);
         return p;
     }
 

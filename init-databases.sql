@@ -1,4 +1,3 @@
--- init-databases.sql
 CREATE DATABASE smartlogix_users;
 CREATE DATABASE smartlogix_auth;
 CREATE DATABASE smartlogix_orders;
@@ -7,15 +6,6 @@ CREATE DATABASE smartlogix_shipping;
 CREATE DATABASE smartlogix_notifications;
 
 \c smartlogix_users;
-
-CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    nombre VARCHAR(255) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    pyme_id BIGINT NOT NULL,
-    role VARCHAR(255) NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
@@ -41,13 +31,14 @@ CREATE TABLE IF NOT EXISTS products (
     id BIGSERIAL PRIMARY KEY,
     available_quantity INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
+    price FLOAT NOT NULL,
     pyme_id BIGINT NOT NULL,
     reserved_quantity INTEGER NOT NULL,
     total_quantity INTEGER NOT NULL
 );
 
-INSERT INTO products (available_quantity, name, pyme_id, reserved_quantity, total_quantity) VALUES
-(100, 'Teclado Mecánico', 50, 0, 100),
-(50, 'Mouse Inalámbrico', 50, 0, 50),
-(30, 'Monitor 27 Pulgadas', 50, 0, 30),
-(200, 'Cable HDMI', 50, 0, 200);
+INSERT INTO products (available_quantity, name, price, pyme_id, reserved_quantity, total_quantity) VALUES
+(100, 'Teclado Mecánico', 45000, 50, 0, 100),
+(50, 'Mouse Inalámbrico', 15000, 50, 0, 50),
+(30, 'Monitor 27 Pulgadas', 120000, 50, 0, 30),
+(200, 'Cable HDMI', 5000, 50, 0, 200);

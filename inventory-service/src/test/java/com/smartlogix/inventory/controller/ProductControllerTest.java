@@ -51,6 +51,7 @@ public class ProductControllerTest {
         ProductRequest r = new ProductRequest();
         r.setName("Test Product");
         r.setTotalQuantity(50);
+        r.setPrice(19.99);
         return r;
     }
 
