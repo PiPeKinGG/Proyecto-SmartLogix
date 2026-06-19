@@ -1,6 +1,6 @@
 # User Service - SmartLogix
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -21,7 +21,7 @@ A diferencia de un sistema monolítico, este servicio expone controladores dedic
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Persistencia de Datos | Spring Data JPA / Hibernate |
 | Base de Datos | PostgreSQL (patrón Database-per-service) |
@@ -49,7 +49,7 @@ Auth Service (:8081) -> (OpenFeign) -> User Service (:8082/internal/users) -> Ve
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- JDK 17 o superior
+- JDK 21
 - Maven 3.8 o superior
 - PostgreSQL corriendo localmente con una base de datos llamada `smartlogix_users`
 - Apache Kafka configurado en el puerto 9092
