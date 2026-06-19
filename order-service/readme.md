@@ -1,6 +1,6 @@
 # Order Service - SmartLogix
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -20,7 +20,7 @@ Implementa un enfoque de Saga / Coreografía mediante eventos para asegurar la c
 
 | Tecnología | Versión / Detalle |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework | Spring Boot 3.x |
 | Base de datos | PostgreSQL |
 | Mensajería | Apache Kafka |
@@ -67,7 +67,7 @@ Cliente -> API Gateway -> Order Service -> (Sincrono: OpenFeign) -> Inventory Se
 
 ## Requisitos Previos
 
-- Java 17 o superior
+- Java 21 
 - Maven 3.8+
 - Docker y Docker Compose (para ejecución en contenedores)
 - Base de datos PostgreSQL corriendo localmente o en Docker
