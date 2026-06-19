@@ -4,7 +4,7 @@
 
 **Microservicio de gestión de catálogo de productos y control de stock para el ecosistema SmartLogix.**
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -42,7 +42,7 @@ Order Service  →  OpenFeign  →  Inventory Service (:8083)  →  Reserva de S
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Persistencia de Datos | Spring Data JPA / Hibernate |
 | Base de Datos | PostgreSQL *(Patrón Database-per-service)* |
@@ -55,7 +55,7 @@ Order Service  →  OpenFeign  →  Inventory Service (:8083)  →  Reserva de S
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- **JDK 17** o superior
+- **JDK 21**
 - **Maven 3.8** o superior
 - **PostgreSQL** corriendo de forma local con una base de datos llamada `smartlogix_inventory`
 - **Eureka Server** corriendo en el puerto `8761` para permitir el registro en la red
