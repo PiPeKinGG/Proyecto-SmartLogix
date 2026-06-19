@@ -4,7 +4,7 @@
 
 **Punto de entrada único (BFF) y enrutador principal para el ecosistema SmartLogix.**
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Cloud Gateway](https://img.shields.io/badge/Spring_Cloud_Gateway-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -39,7 +39,7 @@ React (Frontend)  →  API Gateway (:8080)  →  Validación JWT  →  Microserv
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Enrutamiento | Spring Cloud Gateway |
 | Seguridad | Custom Global Filter (JWT Validation) |
@@ -52,7 +52,7 @@ React (Frontend)  →  API Gateway (:8080)  →  Validación JWT  →  Microserv
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- **JDK 17** o superior
+- **JDK 21**
 - **Maven 3.8** o superior
 - **Eureka Server** corriendo en el puerto `8761` (requerido para el descubrimiento de rutas)
 
