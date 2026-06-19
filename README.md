@@ -1,95 +1,155 @@
-# SmartLogix - Backend
+# SmartLogix - BackEnd
 
-SmartLogix es una plataforma de gestión logística construida bajo una arquitectura de microservicios orientada a eventos. Este repositorio contiene el backend completo del sistema, incluyendo los servicios de negocio, infraestructura de mensajería, bases de datos y descubrimiento de servicios.
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Eureka](https://img.shields.io/badge/Eureka_Discovery-Service-007396?style=for-the-badge)
+![JUnit5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
+![JaCoCo](https://img.shields.io/badge/JaCoCo-C00?style=for-the-badge&logo=java&logoColor=white)
 
----
+Plataforma logística y de comercio electrónico orientada a la arquitectura Multi-Tenant.
 
-## Tecnologías principales
+## Descripción del Proyecto
 
-- **Java / Spring Boot** — Framework principal para los microservicios.
-- **PostgreSQL 15** — Base de datos relacional, una instancia con múltiples bases de datos lógicas.
-- **Apache Kafka 3.8.0** — Broker de mensajería para comunicación asíncrona (modo KRaft, sin Zookeeper).
-- **Netflix Eureka** — Registro y descubrimiento de servicios.
-- **Spring Cloud Gateway** — API Gateway para enrutamiento centralizado.
-- **Docker y Docker Compose** — Contenerización y orquestación local.
+SmartLogix es una arquitectura distribuida basada en microservicios, diseñada para gestionar inventarios, procesar órdenes de compra, coordinar envíos y emitir notificaciones. El sistema implementa un enfoque Multi-Tenant, permitiendo que múltiples PYMEs operen sobre la misma infraestructura de manera aislada, identificadas mediante su `pyme_id` el cual se asigna respectivamente a la hora de crear cada usuario.
 
----
+La comunicación entre dominios utiliza un modelo híbrido: peticiones síncronas vía API Gateway y OpenFeign para consultas de lectura/validación, y mensajería asíncrona a través de Apache Kafka para el patrón de coreografía de eventos (Saga).
 
-## Arquitectura de servicios
+> Todas las peticiones externas deben dirigirse exclusivamente al API Gateway (`:8080`). Ningún microservicio de dominio debe ser expuesto directamente fuera de la red privada de Docker.
 
-### Infraestructura base
+## Topología del Ecosistema
 
-| Servicio | Puerto | Descripción |
+El entorno está compuesto por los siguientes contenedores interconectados mediante una red privada de Docker (`smartlogix-net`).
+
+### Infraestructura Base
+
+| Componente | Puerto | Descripción |
 |---|---|---|
-| `postgres-db` | 5432 | Instancia central de PostgreSQL |
-| `kafka` | 9092 | Nodo Kafka autónomo para eventos del sistema |
-| `eureka-server` | 8761 | Registro central de microservicios |
+| PostgreSQL | 5432 | Instancia única que inicializa bases de datos independientes por servicio mediante el script `init-databases.sql` |
+| Apache Kafka | 9092 | Broker de mensajería para eventos asíncronos (`order-created`, `shipment-dispatched`, etc.) |
+| Eureka Server | 8761 | Servidor de descubrimiento de servicios |
 
-### API Gateway
+### Microservicios
 
-| Servicio | Puerto | Descripción |
-|---|---|---|
-| `api-gateway` | 8080 | Punto de entrada único para clientes (Frontend/Móvil) |
+| Servicio | Puerto | Stack | Responsabilidad |
+|---|---|---|---|
+| API Gateway | 8080 | Java 21, Spring Cloud Gateway | Único punto de entrada público. Enruta tráfico y valida firmas JWT |
+| Auth Service | 8081 | Java 21, Spring Security, JWT | Emisión de tokens y control de acceso |
+| User Service | 8082 | Java 21, Spring Data JPA | Gestión de perfiles y credenciales de usuarios |
+| Inventory Service | 8083 | Java 21, JPA/Hibernate | Control transaccional de stock de productos (Multi-Tenant) |
+| Order Service | 8084 | Java 21, OpenFeign, Kafka | Orquestador central de compras (Saga/Coreografía) |
+| Shipping Service | 8085 | Java 21, Strategy/Factory | Logística y cálculo dinámico de despachos |
+| Notification Service | 8086 | Node.js, Express.js | Consumidor de eventos para alertas vía email/SMS |
 
-### Microservicios de negocio
+> Eureka Server no requiere variables de entorno obligatorias adicionales para su arranque; los demás servicios dependen de su disponibilidad en el puerto `8761` para registrarse correctamente.
 
-| Servicio | Descripción |
-|---|---|
-| `user-service` | Gestión de usuarios y perfiles |
-| `auth-service` | Autenticación, autorización y emisión de tokens |
-| `order-service` | Ciclo de vida de los pedidos |
-| `inventory-service` | Control de stock y catálogo de productos |
-| `shipping-service` | Gestión de envíos, despachos y estrategias de entrega |
-| `notification-service` | Alertas por email/SMS basadas en eventos del sistema |
+### Diagrama de Flujo General
 
----
-
-## Requisitos previos
-
-- Docker y Docker Compose instalados
-- Java 17 o superior (para desarrollo local)
-- Maven (para compilación local)
-
----
-
-## Despliegue local
-
-### 1. Clonar el repositorio
-
-```bash
-git clone <url-del-repositorio>
-cd Proyecto-SmartLogix
+```text
+Cliente -> API Gateway (:8080) -> [Auth | User | Inventory | Order | Shipping] Service
+                                          |
+                                          +-> (Sincrono: OpenFeign) -> Validaciones entre servicios
+                                          |
+                                          +-> (Asincrono: Kafka) -> Order Created / Inventory Reserved
+                                          |                          / Shipment Dispatched / etc.
+                                          |
+                                          +-> Notification Service (consumidor Kafka, Node.js)
 ```
 
-### 2. Levantar el entorno completo
+## Guía de Despliegue Rápido (Docker Compose)
+
+El proyecto está diseñado para levantarse con un solo comando gracias a la configuración de Docker Compose, la cual maneja los healthchecks para encender la infraestructura en el orden correcto.
+
+Requisitos previos:
+
+- Docker Desktop o Docker Engine instalado y en ejecución
+
+Paso 1 — Ubícate en la raíz del proyecto.
+
+Paso 2 — Ejecuta el entorno completo en segundo plano:
 
 ```bash
 docker-compose up -d --build
 ```
 
-Docker Compose construye las imágenes de los microservicios y levanta la infraestructura en el orden correcto mediante `depends_on` y `healthcheck`.
+> La primera ejecución tomará varios minutos mientras Docker descarga las imágenes base de Alpine, Java, Node, Postgres y Kafka, y compila los contenedores locales.
 
-### 3. Verificar el estado
+Paso 3 — Monitorea el despliegue. Verifica que todos los servicios se hayan registrado correctamente accediendo al panel de Eureka:
 
-- **Eureka Dashboard:** `http://localhost:8761` — muestra los servicios registrados y activos.
-- **API Gateway:** `http://localhost:8080` — punto de entrada para todas las peticiones.
-
-### 4. Detener el entorno
-
-```bash
-docker-compose down
+```text
+http://localhost:8761
 ```
 
-Para borrar también los volúmenes de base de datos:
+Para detener y limpiar completamente el ecosistema:
 
 ```bash
 docker-compose down -v
 ```
 
----
+> El flag `-v` asegura la limpieza de los volúmenes de base de datos para pruebas limpias.
 
-## Inicialización de datos
+## Automatización de Pruebas y Cobertura
 
-Al levantar el contenedor de PostgreSQL por primera vez, el script `init-databases.sql` se ejecuta automáticamente y aprovisiona las bases de datos necesarias para cada microservicio.
+Cada microservicio ha sido desarrollado con un estándar de calidad que supera, en promedio, el 60% de cobertura de código. Los servicios Java utilizan JaCoCo y el servicio Node.js utiliza Jest.
 
-Las credenciales por defecto para el entorno local son `postgres` / `password`.
+Para ejecutar la suite de pruebas de un microservicio individual:
+
+```bash
+# Servicios Java
+mvn clean test jacoco:report
+
+# Notification Service (Node.js)
+npm test
+```
+
+Para agilizar la revisión de los reportes HTML generados por JaCoCo y Jest, puedes utilizar el siguiente script de PowerShell desde la raíz del proyecto. Buscará y abrirá automáticamente todos los reportes de cobertura disponibles en tu navegador por defecto:
+
+```powershell
+# Abrir reportes de Java (JaCoCo)
+@('auth-service','user-service','inventory-service','order-service','shipping-service','api-gateway','eureka-server') | ForEach-Object {
+    $path = "$_\target\site\jacoco\index.html"
+    if (Test-Path $path) {
+        Invoke-Item $path
+    } else {
+        Write-Host "No encontrado (Java): $path"
+    }
+}
+
+# Abrir reporte de Node (Jest)
+$nodePath = "notification-service\coverage\index.html"
+if (Test-Path $nodePath) {
+    Invoke-Item $nodePath
+} else {
+    Write-Host "No encontrado (Node): $nodePath"
+}
+```
+
+> `eureka-server` no incluye sección de pruebas con cobertura JaCoCo; el script las omite silenciosamente si no encuentra el reporte.
+
+## Uso de la API (Ejemplo Multi-Tenant)
+
+Al realizar pruebas externas (por ejemplo, desde Postman), todas las peticiones deben apuntar al puerto 8080 (API Gateway) e incluir el header `pyme_id` para resolver la tenencia de los datos correctamente.
+
+Ejemplo de petición al catálogo de productos:
+
+```http
+GET http://localhost:8080/products
+Authorization: Bearer <TU_TOKEN_JWT>
+pyme_id: 50
+```
+
+## Documentación por Microservicio
+
+| Microservicio | Documento |
+|---|---|
+| API Gateway | `README-api-gateway.md` |
+| Auth Service | `README-auth-service.md` |
+| User Service | `README-user-service.md` |
+| Inventory Service | `README-inventory-service.md` |
+| Order Service | `README-order-service.md` |
+| Shipping Service | `README-shipping-service.md` |
+| Notification Service | `README-notification-service.md` |
+| Eureka Server | `README-eureka-server.md` |
