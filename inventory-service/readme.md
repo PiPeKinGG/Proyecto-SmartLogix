@@ -70,7 +70,7 @@ El servicio corre internamente en el puerto **`8083`** y se configura mediante e
 |---|---|---|
 | `SPRING_DATASOURCE_URL` | Ruta de conexión a la BD PostgreSQL | `jdbc:postgresql://localhost:5432/smartlogix_inventory` |
 | `SPRING_DATASOURCE_USERNAME` | Usuario de la base de datos | `postgres` |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de datos | `tu_contraseña` |
+| `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de datos | `password` |
 | `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE` | URL del servidor Eureka | `http://localhost:8761/eureka/` |
 
 ---
@@ -132,7 +132,7 @@ mvn clean test jacoco:report
 **Headers requeridos:**
 ```
 Authorization: Bearer <token>
-pyme_id: 1
+pyme_id: 50
 ```
 
 **Respuesta Exitosa — `200 OK`:**
@@ -140,9 +140,9 @@ pyme_id: 1
 [
   {
     "id": 1,
-    "name": "Teclado Mecánico",
+    "name": "Teclado de Membrana Marvo",
     "availableQuantity": 100,
-    "price": 45000.0
+    "price": 15000
   }
 ]
 ```
@@ -156,7 +156,7 @@ pyme_id: 1
 **Headers requeridos:**
 ```
 Authorization: Bearer <token>
-pyme_id: 1
+pyme_id: 50
 ```
 
 **Respuesta Exitosa — `200 OK`:**
