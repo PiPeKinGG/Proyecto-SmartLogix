@@ -4,7 +4,7 @@
 
 **Servidor de descubrimiento y registro dinámico para el ecosistema de microservicios de SmartLogix.**
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Eureka Server](https://img.shields.io/badge/Eureka_Server-6DB33F?style=for-the-badge&logo=spring&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
@@ -32,7 +32,7 @@ Este servicio no interactúa directamente con el cliente (React) ni maneja bases
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Service Discovery | Spring Cloud Netflix Eureka Server |
 
@@ -42,7 +42,7 @@ Este servicio no interactúa directamente con el cliente (React) ni maneja bases
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- **JDK 17** o superior
+- **JDK 21** 
 - **Maven 3.8** o superior
 
 > **Nota:** Este componente no requiere ninguna base de datos ni broker de mensajería.
