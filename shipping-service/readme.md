@@ -1,6 +1,6 @@
 # Shipping Service - SmartLogix
 
-![Java](https://img.shields.io/badge/Java_17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Java](https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
@@ -21,7 +21,7 @@ Este servicio destaca por la implementación de los patrones de diseño Factory 
 
 | Categoría | Tecnología |
 |---|---|
-| Lenguaje | Java 17 |
+| Lenguaje | Java 21 |
 | Framework Core | Spring Boot 3 |
 | Patrones de Diseño | Strategy Pattern, Factory Pattern |
 | Base de Datos | PostgreSQL |
@@ -55,7 +55,7 @@ React (Frontend) -> API Gateway (:8080) -> Shipping Service (:8085) -> Consulta 
 
 Para levantar este microservicio de forma local (fuera de Docker), asegúrate de tener instalado:
 
-- JDK 17 o superior
+- JDK 21
 - Maven 3.8 o superior
 - PostgreSQL corriendo localmente con una base de datos destinada a los envíos (`smartlogix_shipping`)
 - Apache Kafka y Zookeeper corriendo en el puerto 9092
